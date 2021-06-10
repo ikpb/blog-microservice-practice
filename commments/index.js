@@ -1,0 +1,30 @@
+const express = require('express');
+const {randomBytes} = require('crypto');
+const { restart } = require('nodemon');
+
+
+const app = express();
+app.use(express.json());
+
+const commentsByPostId = {};
+
+
+app.get('/posts/:id/comments', (req, res)=> {
+res.send(commentsByPostId[req.params.id] || []);
+});
+app.post('/posts/:id/comments', (req, res)=> {
+    const commentid = randomBytes(4).toString('hex');
+    const { content }  = req.body;
+
+    const  comments = commentsByPostId[req.params.id] || [];
+
+    comments.push({id:commentid, content});
+
+    commentsByPostId[req.params.id] = comments;
+
+    res.status(201).send(comments)
+});
+
+app.listen(4001, ()=>{
+    console.log('Listening on 4001')
+})
